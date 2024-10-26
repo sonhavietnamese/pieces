@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+
+  id       String @id @default(cuid())
+  googleId String @unique @map("google_id")
+  email    String @unique
+
+  username String @unique
+  name     String
+  avatar   String
+
+  friends   Friend[] @relation("UserFriends")
+  friendsOf Friend[] @relation("UserFriendsOf")
+
+  sessions Session[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Friend {
+  @@map("friends")
+
+  userId   String @map("user_id")
+  friendId String @map("friend_id")
+
+  user   User @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
+  friend User @relation("UserFriendsOf", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@id([userId, friendId])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime @map("expires_at")
+
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+  userId String
+
+  @@index([userId])
+  @@map("sessions")
+}
