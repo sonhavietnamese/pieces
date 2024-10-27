@@ -98,7 +98,3 @@
     background-position: var(--background-size) var(--background-size);
   }
 }
-
-.bg-clip {
-  clip-path: url(#roundedRectClip);
-}

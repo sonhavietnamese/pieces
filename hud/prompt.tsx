@@ -98,7 +98,7 @@ export default function Prompt() {
         className="relative mt-4 h-fit w-full overflow-auto rounded-xl"
       >
         <input
-          placeholder="Ex: "
+          placeholder="Ex: A shinny sunflower"
           className="w-full resize-none rounded-xl border-none bg-white/70 p-3 pl-4 pr-16 text-primary outline-none placeholder:text-primary/50"
         />
 

@@ -23,7 +23,7 @@ export default function Ground() {
   const onAdd = (event: ThreeEvent<PointerEvent>) => {
     appendStuff({
       id: Date.now().toString(),
-      position: [event.point.x + 2, event.point.y, event.point.z + 2],
+      position: [event.point.x + 2, event.point.y + 5, event.point.z + 2],
     })
   }
 

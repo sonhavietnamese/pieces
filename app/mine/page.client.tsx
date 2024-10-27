@@ -56,7 +56,7 @@ export default function PageClient({ user }: PageClientProps) {
         gsap.fromTo(
           groupButtonsRef.current,
           { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.2, delay: 0.4 },
+          { opacity: 1, y: 0, duration: 0.2, delay: 0.2 },
         )
       }
 
