@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.1",
+    "@imgly/background-removal": "^1.5.5",
     "@livepeer/ai": "^0.4.0",
     "@lucia-auth/adapter-prisma": "^4.0.1",
     "@prisma/client": "^5.21.1",

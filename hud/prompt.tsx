@@ -2,7 +2,9 @@
 
 import { FormEvent, useMemo, useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react'
+import { removeBackground } from '@imgly/background-removal'
 import { gsap } from 'gsap'
+import { LoaderCircle } from 'lucide-react'
 
 import BorderBeam from '@/components/border-beam'
 import { usePrompt } from '@/hooks/use-prompt'
@@ -14,8 +16,9 @@ export default function Prompt() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [value, setValue] = useState('')
   const [loading, setLoading] = useState(false)
+  const controller = useRef<AbortController | null>(null) // Add this line to create a reference for the AbortController
 
-  const showSubmitButton = useMemo(() => value.length > 0, [value])
+  const showSubmitButton = useMemo(() => value.length > 4, [value])
 
   const { isOpen, setIsOpen } = usePrompt()
   const { appendStuff, setSelectedStuff } = useStuffs()
@@ -24,20 +27,33 @@ export default function Prompt() {
   const generate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
+    controller.current = new AbortController()
+
     try {
       setLoading(true)
       const payload = {
-        model_id: 'ByteDance/SDXL-Lightning',
-        prompt: 'A sunflower',
-        width: 1024,
+        model_id: 'black-forest-labs/FLUX.1-dev',
+        prompt: `Create a cozy style pixel art, very low resolution of a single object that is ${value}. The artwork should be strictly 32x32 pixels in size, with a focus on warmth and comfort. Place the object in the center vertical and bottom horizontal against a solid black background. Ensure the object stands out clearly and captures a cozy aesthetic.`,
+        width: 512,
         height: 1024,
-        loras: '{ "latent-consistency/lcm-lora-sdxl": 1.0, "nerijs/pixel-art-xl": 1.2}',
+        loras: '{ "artificialguybr/PixelArtRedmond": 1.2}',
       }
 
+      const res = await fetch('https://dream-gateway.livepeer.cloud/text-to-image', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        signal: controller.current.signal,
+      })
+
+      const data = await res.json()
+
+      const blob = await removeBackground(data.images[0].url)
+
+      const url = URL.createObjectURL(blob)
       const newStuff: Stuff = {
         id: Date.now().toString(),
         position: [0, -50, 0],
-        texture: 'https://obj-store.livepeer.cloud/livepeer-cloud-ai-images/26142d8d/d8b7501a.png',
+        texture: url,
       }
 
       appendStuff(newStuff)
@@ -45,24 +61,12 @@ export default function Prompt() {
       setStage('edit')
 
       setIsOpen(false)
-
-      // setNewStuff({
-      //   id: Date.now().toString(),
-      //   position: [0, 0, 0],
-      //   texture: 'https://obj-store.livepeer.cloud/livepeer-cloud-ai-images/26142d8d/d8b7501a.png',
-      // })
-
-      // https://obj-store.livepeer.cloud/livepeer-cloud-ai-images/26142d8d/d8b7501a.png
-      // const res = await fetch('https://dream-gateway.livepeer.cloud/text-to-image', {
-      //   method: 'POST',
-      //   body: JSON.stringify(payload),
-      // })
-
-      // const data = await res.json()
-
-      // console.log(data)
     } catch (error) {
-      console.error(error)
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Fetch aborted') // Handle the abort error
+      } else {
+        console.error(error)
+      }
     } finally {
       setLoading(false)
     }
@@ -89,6 +93,11 @@ export default function Prompt() {
   )
 
   const onClose = () => {
+    if (loading) {
+      controller.current?.abort() // Abort the fetch request if loading
+      return
+    }
+
     setIsOpen(false)
     setValue('')
     setSelectedStuff(null)
@@ -177,8 +186,9 @@ export default function Prompt() {
               'absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg bg-primary/50 px-2.5 py-1.5 font-semibold text-white transition-all duration-300 ease-in-out hover:bg-primary group-hover:bg-primary/70',
               !showSubmitButton && 'pointer-events-none opacity-0',
             )}
+            disabled={loading}
           >
-            Go
+            {loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : 'Go'}
           </button>
         </form>
       </aside>
