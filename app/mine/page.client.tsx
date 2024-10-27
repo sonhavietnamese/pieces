@@ -115,11 +115,12 @@ export default function PageClient({ user }: PageClientProps) {
           { opacity: 1, y: 0, pointerEvents: 'auto', duration: 0.2 },
         )
       } else {
-        gsap.fromTo(
-          editButtonGroupRef.current,
-          { opacity: 1, y: 0, pointerEvents: 'auto' },
-          { opacity: 0, y: 20, pointerEvents: 'none', duration: 0.2 },
-        )
+        gsap.to(editButtonGroupRef.current, {
+          opacity: 0,
+          y: 20,
+          pointerEvents: 'none',
+          duration: 0.2,
+        })
       }
     },
     { scope: containerRef, dependencies: [stage] },
@@ -160,7 +161,7 @@ export default function PageClient({ user }: PageClientProps) {
       <svg className="absolute h-full w-full" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <clipPath id="roundedRectClip">
-            <rect x="0" y="0" width="100%" height="100%" rx="24" />
+            <rect x="0" y="0" width="100%" height="100%" rx="0" />
           </clipPath>
         </defs>
       </svg>

@@ -13,7 +13,7 @@ export default async function Page() {
 
   return (
     <>
-      <LogoutButton />
+      {/* <LogoutButton /> */}
       <PageClient user={session.user} />
     </>
   )
