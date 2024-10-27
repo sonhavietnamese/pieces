@@ -16,7 +16,7 @@ export default function Prompt() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [value, setValue] = useState('')
   const [loading, setLoading] = useState(false)
-  const controller = useRef<AbortController | null>(null) // Add this line to create a reference for the AbortController
+  const controller = useRef<AbortController | null>(null)
 
   const showSubmitButton = useMemo(() => value.length > 4, [value])
 
