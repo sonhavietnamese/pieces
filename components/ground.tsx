@@ -21,7 +21,7 @@ export default function Ground() {
   groundTexture.repeat.set(15, 9)
 
   const onEnter = (event: ThreeEvent<PointerEvent>) => {
-    indicatorRef.current?.position.set(event.point.x + 1, -2.5, event.point.z + 1)
+    indicatorRef.current?.position.set(event.point.x + 1, 2, event.point.z + 1)
   }
 
   const onPointerUp = (event: ThreeEvent<PointerEvent>) => {
@@ -29,7 +29,7 @@ export default function Ground() {
       setSelectedStuff(null)
       updateStuff({
         ...selectedStuff,
-        position: [event.point.x + 2, event.point.y + 5, event.point.z + 2],
+        position: [event.point.x + 2, event.point.y + 12, event.point.z + 2],
       })
     }
   }

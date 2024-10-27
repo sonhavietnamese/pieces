@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { ThreeEvent } from '@react-three/fiber'
 import { Select } from '@react-three/postprocessing'
 import { useDebounceCallback } from 'usehooks-ts'
 
 import { useStage } from '@/hooks/use-stage'
 import { Stuff, useStuffs } from '@/hooks/use-stuffs'
+import StuffPlane from './stuff-plane'
 
 export default function Stuffs() {
   const { stuffs, updateStuff, setSelectedStuff } = useStuffs()
@@ -25,28 +26,27 @@ export default function Stuffs() {
     })
     setSelectedStuff({
       ...stuff,
-      position: [event.point.x + 2, -2.5, event.point.z + 2],
+      position: [event.point.x + 2, 2, event.point.z + 2],
     })
     setStage('edit')
   }
 
   return (
     <group>
-      {stuffs.map((stuff) => (
-        <Select enabled={stuff.id === value}>
-          <mesh
-            onPointerOver={() => debounced(stuff.id)}
-            onPointerOut={() => debounced('')}
-            onPointerUp={(e) => onPointerUp(e, stuff)}
-            key={stuff.id}
-            position={stuff.position}
-            rotation={[0.3, 0, 0]}
-          >
-            <boxGeometry args={[10, 10, 10]} />
-            <meshStandardMaterial color="red" />
-          </mesh>
-        </Select>
-      ))}
+      <Suspense fallback={null}>
+        {stuffs.map((stuff) => (
+          <Select enabled={stuff.id === value}>
+            <StuffPlane
+              stuff={stuff}
+              onPointerOver={() => debounced(stuff.id)}
+              onPointerOut={() => debounced('')}
+              onPointerUp={(e) => onPointerUp(e, stuff)}
+              key={stuff.id}
+              position={stuff.position}
+            />
+          </Select>
+        ))}
+      </Suspense>
     </group>
   )
 }
