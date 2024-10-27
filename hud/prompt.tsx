@@ -92,6 +92,7 @@ export default function Prompt() {
     setIsOpen(false)
     setValue('')
     setSelectedStuff(null)
+    setStage('idle')
   }
 
   return (

@@ -27,6 +27,7 @@ export const GET = async (req: NextRequest) => {
     const tokens = await google.validateAuthorizationCode(code, codeVerifier)
     console.log(tokens)
     const googleUserRes = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
+      // @ts-expect-error
       headers: { Authorization: `Bearer ${tokens.data.access_token}` },
     })
 
