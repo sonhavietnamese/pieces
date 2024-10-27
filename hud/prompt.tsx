@@ -35,7 +35,7 @@ export default function Prompt() {
         model_id: 'black-forest-labs/FLUX.1-dev',
         prompt: `Create a cozy style pixel art, very low resolution of a single object that is ${value}. The artwork should be strictly 32x32 pixels in size, with a focus on warmth and comfort. Place the object in the center vertical and bottom horizontal against a solid black background. Ensure the object stands out clearly and captures a cozy aesthetic.`,
         width: 512,
-        height: 1024,
+        height: 512,
         loras: '{ "artificialguybr/PixelArtRedmond": 1.2}',
       }
 

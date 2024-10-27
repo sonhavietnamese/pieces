@@ -171,11 +171,7 @@ export default function Broadcast() {
                 </div>
 
                 <div className="flex flex-col gap-0.5">
-                  <Link
-                    target="_blank"
-                    href="https://x.com/boobyblon_"
-                    className="font-collage text-sm text-primary/80 hover:underline"
-                  >
+                  <Link href="#" className="font-collage text-sm text-primary/80">
                     @boobyblon_
                   </Link>
                   <p className="ml-1 select-none text-sm leading-none text-primary/50">

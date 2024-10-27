@@ -14,7 +14,7 @@ const StuffPlane = forwardRef<THREE.Mesh, StuffPlaneProps>(({ stuff }, ref) => {
 
   return (
     <mesh ref={ref} position={stuff.position} rotation={[-0.3, 0, 0]}>
-      <planeGeometry args={[16, 32]} />
+      <planeGeometry args={[32, 32]} />
       <meshStandardMaterial map={texture} transparent />
     </mesh>
   )

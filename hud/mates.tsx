@@ -7,6 +7,8 @@ import { gsap } from 'gsap'
 
 import { useMate } from '@/hooks/use-mate'
 import { useStage } from '@/hooks/use-stage'
+import { MATES_MOCK } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 
 export default function Mates() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -103,31 +105,38 @@ export default function Mates() {
 
       <div className="mt-2 h-[400px] w-full overflow-auto rounded-xl">
         <ul className="mt-1 flex flex-col gap-3">
-          {Array.from({ length: 10 }).map((_, index) => (
+          {MATES_MOCK.map((mate) => (
             <li
               id={`mate-card`}
-              key={index}
+              key={mate.id}
               className="group relative flex min-h-28 items-start gap-3.5 rounded-xl bg-white/70 p-3"
             >
               <div className="relative flex items-center gap-2">
                 <figure className="relative h-16 w-16 overflow-hidden rounded-lg bg-[#EDDCC0]">
                   <Image
                     draggable={false}
-                    src="/avatars/boxi.webp"
-                    alt="Avatar"
+                    src={mate.avatar}
+                    alt={mate.username}
                     fill
                     className="object-cover"
                   />
                 </figure>
 
-                <div className="outline-3 absolute -bottom-1 -right-1.5 h-3 w-3 rounded-full bg-[#32E069] outline outline-white"></div>
+                <div
+                  className={cn(
+                    'absolute -bottom-1 -right-1.5 h-3 w-3 rounded-full outline outline-white',
+                    {
+                      'bg-[#32E069]': mate.status === 'online',
+                      'bg-[#F44336]': mate.status === 'offline',
+                      'bg-[#FF9800]': mate.status === 'away',
+                    },
+                  )}
+                ></div>
               </div>
 
               <div className="mt-2 flex flex-col gap-1">
-                <span className="font-collage text-primary/80">@boobyblon_</span>
-                <p className="select-none text-sm leading-none text-primary/50">
-                  Come take the sunflower
-                </p>
+                <span className="font-collage text-primary/80">@{mate.username}</span>
+                <p className="select-none text-sm leading-none text-primary/50">{mate.bio}</p>
               </div>
 
               <button className="absolute bottom-3 right-3 rounded-lg bg-primary/50 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-primary group-hover:bg-primary/70">
