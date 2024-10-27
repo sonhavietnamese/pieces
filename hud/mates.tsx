@@ -6,11 +6,13 @@ import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
 
 import { useMate } from '@/hooks/use-mate'
+import { useStage } from '@/hooks/use-stage'
 
 export default function Mates() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const { isOpen, setIsOpen } = useMate()
+  const { setStage } = useStage()
 
   useGSAP(
     () => {
@@ -20,6 +22,7 @@ export default function Mates() {
           y: -20,
           duration: 0.3,
           delay: 0.3,
+          pointerEvents: 'auto',
         })
 
         gsap.fromTo(
@@ -29,16 +32,21 @@ export default function Mates() {
         )
       }
       if (!isOpen) {
-        gsap.to(containerRef.current, { opacity: 0, duration: 0.3, y: 20 })
+        gsap.to(containerRef.current, { opacity: 0, duration: 0.3, y: 20, pointerEvents: 'none' })
       }
     },
     { scope: containerRef, dependencies: [isOpen] },
   )
 
+  const onClose = () => {
+    setIsOpen(false)
+    setStage('idle')
+  }
+
   return (
     <aside
       ref={containerRef}
-      className="absolute bottom-0 right-5 max-h-[50vh] w-[400px] rounded-3xl bg-background p-4 leading-none opacity-0"
+      className="pointer-events-none absolute bottom-0 right-5 max-h-[50vh] w-[400px] rounded-3xl bg-background p-4 leading-none opacity-0"
       style={{
         zIndex: isOpen ? 50 : 1,
       }}
@@ -48,7 +56,7 @@ export default function Mates() {
 
         <button
           className="group rounded-lg p-1 transition-colors hover:bg-primary/10"
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}
         >
           <figure className="relative flex h-5 w-5 items-center justify-center transition-transform">
             <svg

@@ -12,19 +12,22 @@ export const GET = async (req: NextRequest) => {
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
 
-  const cookie = await cookies()
+  const cookie = cookies()
   const codeVerifier = cookie.get('google_code_verifier')?.value ?? null
   const storedState = cookie.get('google_oauth_state')?.value ?? null
+
+  console.log(codeVerifier, storedState)
 
   if (!code || !state || !codeVerifier || state !== storedState)
     return NextResponse.json({ message: 'Invalid state' }, { status: 400 })
 
-  cookie.delete('google_oauth_state')
+  // cookie.delete('google_oauth_state')
 
   try {
     const tokens = await google.validateAuthorizationCode(code, codeVerifier)
+    console.log(tokens)
     const googleUserRes = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
-      headers: { Authorization: `Bearer ${tokens.accessToken}` },
+      headers: { Authorization: `Bearer ${tokens.data.access_token}` },
     })
 
     const userData = (await googleUserRes.json()) as GoogleUser

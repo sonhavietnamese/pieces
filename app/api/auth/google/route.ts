@@ -8,11 +8,9 @@ export const GET = async (req: Request) => {
   const state = generateState()
   const codeVerifier = generateCodeVerifier()
 
-  const url = await google.createAuthorizationURL(state, codeVerifier, {
-    scopes: ['openid', 'profile', 'email'],
-  })
+  const url = google.createAuthorizationURL(state, codeVerifier, ['openid', 'profile', 'email'])
 
-  const cookie = await cookies()
+  const cookie = cookies()
   cookie.set('google_oauth_state', state, {
     path: '/',
     secure: env.NODE_ENV === 'production',

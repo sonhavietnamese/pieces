@@ -10,6 +10,7 @@ import Vignette from '@/components/vignette'
 import { useBroadcast } from '@/hooks/use-broadcast'
 import { useMate } from '@/hooks/use-mate'
 import { usePrompt } from '@/hooks/use-prompt'
+import { Stage, useStage } from '@/hooks/use-stage'
 import Avatar from '@/hud/avatar'
 import Prompt from '@/hud/prompt'
 
@@ -17,25 +18,24 @@ const Broadcast = dynamic(() => import('@/hud/broadcast'))
 const Mates = dynamic(() => import('@/hud/mates'))
 const Land = dynamic(() => import('@/scenes/land'))
 
-type Panel = 'mates' | 'broadcast' | 'prompt'
-
 interface PageClientProps {
   user: User
 }
+
+type EditAction = 'confirm' | 'cancel' | 'delete'
 
 export default function PageClient({ user }: PageClientProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const groupButtonsRef = useRef<HTMLDivElement>(null)
+  const editButtonGroupRef = useRef<HTMLDivElement>(null)
 
   const { isOpen: isMateOpen, setIsOpen: setIsMateOpen } = useMate()
   const { isOpen: isBroadcastOpen, setIsOpen: setIsBroadcastOpen } = useBroadcast()
   const { isOpen: isPromptOpen, setIsOpen: setIsPromptOpen } = usePrompt()
+  const { stage, setStage } = useStage()
 
-  const isExpanded = useMemo(
-    () => isMateOpen || isBroadcastOpen || isPromptOpen,
-    [isMateOpen, isBroadcastOpen, isPromptOpen],
-  )
+  const isExpanded = useMemo(() => stage !== 'idle', [stage])
 
   useGSAP(
     () => {
@@ -84,10 +84,39 @@ export default function PageClient({ user }: PageClientProps) {
     { scope: containerRef, dependencies: [isExpanded] },
   )
 
-  const handleOpenPanel = (panel: Panel) => {
-    setIsMateOpen(panel === 'mates')
-    setIsBroadcastOpen(panel === 'broadcast')
-    setIsPromptOpen(panel === 'prompt')
+  useGSAP(
+    () => {
+      if (stage === 'edit') {
+        gsap.fromTo(
+          editButtonGroupRef.current,
+          { opacity: 0, y: 20, pointerEvents: 'none' },
+          { opacity: 1, y: 0, pointerEvents: 'auto', duration: 0.2 },
+        )
+      } else {
+        gsap.fromTo(
+          editButtonGroupRef.current,
+          { opacity: 1, y: 0, pointerEvents: 'auto' },
+          { opacity: 0, y: 20, pointerEvents: 'none', duration: 0.2 },
+        )
+      }
+    },
+    { scope: containerRef, dependencies: [stage] },
+  )
+
+  const handleOpenPanel = (stage: Stage) => {
+    setIsMateOpen(stage === 'mate')
+    setIsBroadcastOpen(stage === 'broadcast')
+    setIsPromptOpen(stage === 'prompt')
+
+    setStage(stage)
+  }
+
+  const onEdit = (action: EditAction) => {
+    // handleOpenPanel('edit')
+
+    console.log(action)
+
+    setStage('idle')
   }
 
   return (
@@ -352,7 +381,7 @@ export default function PageClient({ user }: PageClientProps) {
 
           <button
             className="group flex items-center gap-2 rounded-full bg-background px-4 py-3 pr-5 text-white transition-colors duration-100 hover:bg-primary"
-            onMouseUp={() => handleOpenPanel('mates')}
+            onMouseUp={() => handleOpenPanel('mate')}
           >
             <figure className="relative flex h-5 w-5 items-center justify-center">
               <svg
@@ -403,6 +432,139 @@ export default function PageClient({ user }: PageClientProps) {
             </span>
           </button>
         </div>
+      </div>
+
+      <div
+        ref={editButtonGroupRef}
+        className="pointer-events-none absolute bottom-9 z-20 flex w-full select-none items-center justify-center gap-3 px-9 opacity-0"
+      >
+        <button
+          className="group flex items-center gap-2 rounded-full bg-background p-3 text-white transition-colors duration-100 hover:bg-primary"
+          onMouseUp={() => onEdit('confirm')}
+        >
+          <figure className="relative flex h-7 w-7 items-center justify-center">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g id="Iconly/Regular/Light/Tick Square">
+                <g id="Tick Square">
+                  <path
+                    id="Stroke 1"
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M16.3344 2.75034H7.66537C4.64437 2.75034 2.75037 4.88934 2.75037 7.91634V16.0843C2.75037 19.1113 4.63537 21.2503 7.66537 21.2503H16.3334C19.3644 21.2503 21.2504 19.1113 21.2504 16.0843V7.91634C21.2504 4.88934 19.3644 2.75034 16.3344 2.75034Z"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-primary group-hover:stroke-background"
+                  />
+                  <path
+                    id="Stroke 3"
+                    d="M8.43982 12.0003L10.8138 14.3733L15.5598 9.62735"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-primary group-hover:stroke-background"
+                  />
+                </g>
+              </g>
+            </svg>
+          </figure>
+        </button>
+
+        <button
+          className="group flex items-center gap-2 rounded-full bg-background p-3 text-white transition-colors duration-100 hover:bg-primary"
+          onMouseUp={() => onEdit('cancel')}
+        >
+          <figure className="relative flex h-7 w-7 items-center justify-center">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g id="Iconly/Regular/Light/Close Square">
+                <g id="Close Square">
+                  <path
+                    id="Stroke 1"
+                    d="M14.3955 9.59503L9.60352 14.387"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-primary group-hover:stroke-background"
+                  />
+                  <path
+                    id="Stroke 2"
+                    d="M14.397 14.3899L9.60095 9.59293"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-primary group-hover:stroke-background"
+                  />
+                  <path
+                    id="Stroke 3"
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M16.3345 2.75034H7.66549C4.64449 2.75034 2.75049 4.88934 2.75049 7.91634V16.0843C2.75049 19.1113 4.63549 21.2503 7.66549 21.2503H16.3335C19.3645 21.2503 21.2505 19.1113 21.2505 16.0843V7.91634C21.2505 4.88934 19.3645 2.75034 16.3345 2.75034Z"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-primary group-hover:stroke-background"
+                  />
+                </g>
+              </g>
+            </svg>
+          </figure>
+        </button>
+
+        <button
+          className="group flex items-center gap-2 rounded-full bg-background p-3 text-white transition-colors duration-100 hover:bg-[#C93C3D]"
+          onMouseUp={() => onEdit('delete')}
+        >
+          <figure className="relative flex h-7 w-7 items-center justify-center">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g id="Iconly/Regular/Light/Delete">
+                <g id="Delete">
+                  <path
+                    id="Stroke 1"
+                    d="M19.325 9.46832C19.325 9.46832 18.782 16.2033 18.467 19.0403C18.317 20.3953 17.48 21.1893 16.109 21.2143C13.5 21.2613 10.888 21.2643 8.28003 21.2093C6.96103 21.1823 6.13803 20.3783 5.99103 19.0473C5.67403 16.1853 5.13403 9.46832 5.13403 9.46832"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-primary group-hover:stroke-background"
+                  />
+                  <path
+                    id="Stroke 3"
+                    d="M20.7082 6.23981H3.75024"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-primary group-hover:stroke-background"
+                  />
+                  <path
+                    id="Stroke 5"
+                    d="M17.4406 6.23979C16.6556 6.23979 15.9796 5.68479 15.8256 4.91579L15.5826 3.69979C15.4326 3.13879 14.9246 2.75079 14.3456 2.75079H10.1126C9.53358 2.75079 9.02558 3.13879 8.87558 3.69979L8.63258 4.91579C8.47858 5.68479 7.80258 6.23979 7.01758 6.23979"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="stroke-primary group-hover:stroke-background"
+                  />
+                </g>
+              </g>
+            </svg>
+          </figure>
+        </button>
       </div>
     </main>
   )

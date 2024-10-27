@@ -33,7 +33,7 @@ export default async function Page() {
                 action={async () => {
                   'use server'
                   await lucia.invalidateSession(session.id)
-                  const cookieStore = await cookies()
+                  const cookieStore = cookies()
                   cookieStore.delete(lucia.sessionCookieName)
                 }}
               >

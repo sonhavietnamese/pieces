@@ -7,11 +7,13 @@ import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
 
 import { useBroadcast } from '@/hooks/use-broadcast'
+import { useStage } from '@/hooks/use-stage'
 
 export default function Broadcast() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const { isOpen, setIsOpen } = useBroadcast()
+  const { setStage } = useStage()
 
   useGSAP(
     () => {
@@ -21,12 +23,14 @@ export default function Broadcast() {
           {
             opacity: 0,
             y: 20,
+            pointerEvents: 'none',
           },
           {
             opacity: 1,
             y: -20,
             duration: 0.3,
             delay: 0.3,
+            pointerEvents: 'auto',
           },
         )
 
@@ -37,16 +41,21 @@ export default function Broadcast() {
         )
       }
       if (!isOpen) {
-        gsap.to(containerRef.current, { opacity: 0, duration: 0.3 })
+        gsap.to(containerRef.current, { opacity: 0, duration: 0.3, pointerEvents: 'none' })
       }
     },
     { scope: containerRef, dependencies: [isOpen] },
   )
 
+  const onClose = () => {
+    setIsOpen(false)
+    setStage('idle')
+  }
+
   return (
     <aside
       ref={containerRef}
-      className="absolute bottom-0 right-5 h-[calc(100%-1.25rem*2)] w-[400px] rounded-3xl bg-background p-4 leading-none opacity-0"
+      className="pointer-events-none absolute bottom-0 right-5 h-[calc(100%-1.25rem*2)] w-[400px] rounded-3xl bg-background p-4 leading-none opacity-0"
       style={{
         zIndex: isOpen ? 50 : 1,
       }}
@@ -91,7 +100,7 @@ export default function Broadcast() {
           </button>
           <button
             className="group rounded-lg p-1 transition-colors hover:bg-primary/10"
-            onClick={() => setIsOpen(false)}
+            onClick={onClose}
           >
             <figure className="relative flex h-5 w-5 items-center justify-center transition-transform">
               <svg
