@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 
-import { HydrateClient } from '@/lib/trpc/server'
 import { auth } from '@/server/auth'
 
 export default async function Page() {

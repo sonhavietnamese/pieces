@@ -9,7 +9,6 @@ datasource db {
 }
 
 model User {
-
   id       String @id @default(cuid())
   googleId String @unique @map("google_id")
   email    String @unique
@@ -21,6 +20,8 @@ model User {
   friends   Friend[] @relation("UserFriends")
   friendsOf Friend[] @relation("UserFriendsOf")
 
+  land Land? // Changed from Land to Land? to make it optional
+
   sessions Session[]
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -30,7 +31,6 @@ model User {
 }
 
 model Friend {
-  @@map("friends")
 
   userId   String @map("user_id")
   friendId String @map("friend_id")
@@ -39,6 +39,7 @@ model Friend {
   friend User @relation("UserFriendsOf", fields: [friendId], references: [id], onDelete: Cascade)
 
   @@id([userId, friendId])
+  @@map("friends")
 }
 
 model Session {
@@ -46,8 +47,22 @@ model Session {
   expiresAt DateTime @map("expires_at")
 
   user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
-  userId String
+  userId String @map("user_id") 
 
   @@index([userId])
   @@map("sessions")
+}
+
+model Land {
+  id String @id @default(cuid())
+
+  user   User   @relation(references: [id], fields: [userId], onDelete: Cascade)
+  userId String @unique @map("user_id")
+
+  stuffs Json @map("stuffs")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("lands")
 }

@@ -2,7 +2,7 @@
 
 import type { User } from '@prisma/client'
 import dynamic from 'next/dynamic'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 
@@ -10,9 +10,12 @@ import Vignette from '@/components/vignette'
 import { useBroadcast } from '@/hooks/use-broadcast'
 import { useMate } from '@/hooks/use-mate'
 import { usePrompt } from '@/hooks/use-prompt'
+import { useSession } from '@/hooks/use-session'
 import { Stage, useStage } from '@/hooks/use-stage'
+import { useStuffs } from '@/hooks/use-stuffs'
 import Avatar from '@/hud/avatar'
 import Prompt from '@/hud/prompt'
+import { api } from '@/lib/trpc/react'
 
 const Broadcast = dynamic(() => import('@/hud/broadcast'))
 const Mates = dynamic(() => import('@/hud/mates'))
@@ -34,6 +37,25 @@ export default function PageClient({ user }: PageClientProps) {
   const { isOpen: isBroadcastOpen, setIsOpen: setIsBroadcastOpen } = useBroadcast()
   const { isOpen: isPromptOpen, setIsOpen: setIsPromptOpen } = usePrompt()
   const { stage, setStage } = useStage()
+  const { stuffs, setStuffs } = useStuffs()
+
+  const session = useSession()
+
+  if (!session) {
+    return null
+  }
+
+  const [land, { refetch }] = api.land.get.useSuspenseQuery({
+    userId: session.user.id,
+  })
+
+  useEffect(() => {
+    if (land && land.stuffs) {
+      setStuffs(JSON.parse(land.stuffs as string))
+    }
+  }, [land])
+
+  const updateLand = api.land.update.useMutation()
 
   const isExpanded = useMemo(() => stage !== 'idle', [stage])
 
@@ -112,9 +134,17 @@ export default function PageClient({ user }: PageClientProps) {
   }
 
   const onEdit = (action: EditAction) => {
-    // handleOpenPanel('edit')
-
-    console.log(action)
+    switch (action) {
+      case 'confirm':
+      case 'cancel':
+        updateLand.mutate({
+          userId: session.user.id,
+          stuffs: JSON.stringify(stuffs),
+        })
+        break
+      case 'delete':
+        break
+    }
 
     setStage('idle')
   }
@@ -522,7 +552,7 @@ export default function PageClient({ user }: PageClientProps) {
           </figure>
         </button>
 
-        <button
+        {/* <button
           className="group flex items-center gap-2 rounded-full bg-background p-3 text-white transition-colors duration-100 hover:bg-[#C93C3D]"
           onMouseUp={() => onEdit('delete')}
         >
@@ -564,7 +594,7 @@ export default function PageClient({ user }: PageClientProps) {
               </g>
             </svg>
           </figure>
-        </button>
+        </button> */}
       </div>
     </main>
   )

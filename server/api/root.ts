@@ -1,4 +1,5 @@
 import { friendRouter } from '@/server/api/routers/friend'
+import { landRouter } from '@/server/api/routers/land'
 import { userRouter } from '@/server/api/routers/user'
 import { createCallerFactory, createTRPCRouter } from '@/server/api/trpc'
 
@@ -10,6 +11,7 @@ import { createCallerFactory, createTRPCRouter } from '@/server/api/trpc'
 export const appRouter = createTRPCRouter({
   friend: friendRouter,
   user: userRouter,
+  land: landRouter,
 })
 
 // export type definition of API

@@ -5,11 +5,13 @@ import { useGSAP } from '@gsap/react'
 import { removeBackground } from '@imgly/background-removal'
 import { gsap } from 'gsap'
 import { LoaderCircle } from 'lucide-react'
+import { v4 as uuidv4 } from 'uuid'
 
 import BorderBeam from '@/components/border-beam'
 import { usePrompt } from '@/hooks/use-prompt'
 import { useStage } from '@/hooks/use-stage'
 import { Stuff, useStuffs } from '@/hooks/use-stuffs'
+import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 
 export default function Prompt() {
@@ -45,22 +47,37 @@ export default function Prompt() {
         signal: controller.current.signal,
       })
 
-      const data = await res.json()
+      const livepeerData = await res.json()
 
-      const blob = await removeBackground(data.images[0].url)
+      const blob = await removeBackground(livepeerData.images[0].url)
 
       const url = URL.createObjectURL(blob)
       const newStuff: Stuff = {
-        id: Date.now().toString(),
+        id: uuidv4(),
         position: [0, -50, 0],
         texture: url,
       }
 
-      appendStuff(newStuff)
-      setSelectedStuff(newStuff)
-      setStage('edit')
+      const { data, error } = await supabase.storage
+        .from('stuffs-textures')
+        .upload(newStuff.id, blob, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+      if (error) {
+        console.error(error)
+      } else {
+        const newStuff: Stuff = {
+          id: uuidv4(),
+          position: [0, -50, 0],
+          texture: `https://izhhgacoahisfvkhrzdi.supabase.co/storage/v1/object/public/${data.fullPath}`,
+        }
+        appendStuff(newStuff)
+        setSelectedStuff(newStuff)
+        setStage('edit')
 
-      setIsOpen(false)
+        setIsOpen(false)
+      }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         console.log('Fetch aborted') // Handle the abort error
